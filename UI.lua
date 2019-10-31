@@ -74,7 +74,7 @@ function UI:addSlider ( min, max, value ) return function()
         , min = min
         , max = max
         , width = 200
-        , height = font:getHeight() + 5 * margin
+        , height = font:getHeight() + 4 * margin
         , state = "normal"
         }
     s.percent = 
