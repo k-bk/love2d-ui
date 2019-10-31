@@ -19,12 +19,23 @@ local c =
    , border =
       { 217/255, 217/255, 217/255 }
    }
+
+function color(what, action)
+   love.graphics.setColor(c[what][action])
+end
+
+-- everything should be set according to the grid
+local grid_size = 5
 local gap = 5
 local margin = 10
 local smargin = 4 
 local radius = 10
 local corner = 5
 local font = love.graphics.getFont()
+
+function round_to_grid(value)
+   return math.ceil(value / grid_size) * grid_size
+end
 
 function UI:addScene ( x, y )
    self.x = x
@@ -44,19 +55,18 @@ end
 function UI:horizontal ( e, ... )
    e = e()
    table.insert( self.scene, e )
+   local oldx = self.x
    self.x = self.x + e.width + gap
    if ... then
       UI:horizontal (...)
    end
-   self.x = self.x - e.width - gap
+   self.x = oldx 
 end
 
 function UI:addButton ( text, fun ) return function ()
    local b = 
        { type = "button"
        , x = self.x, y = self.y
-       , text = text, onClick = fun
-       , state = "normal"
        , width = font:getWidth( text ) + 2 * margin
        , height = font:getHeight() + 2 * margin
        }
@@ -125,6 +135,69 @@ function UI:addParagraph ( lines ) return function()
    return t
 end
 end
+
+-- TODO: rewrite function to use this kind of input
+
+function UI.label(text)
+   return { 
+      type = "label", 
+      text = function () return text[1] end,
+   }
+end
+
+function UI.button(text, fun) 
+   return { 
+      type = "button",
+      text = function () return text end, 
+      on_click = fun,
+      state = "normal",
+   }
+end
+
+function UI.slider() 
+   return { type = "slider" }
+end
+
+function UI.horizontal(content) 
+   content.type = "horizontal"
+   return content 
+end
+
+function UI.draw_new(scene)
+   local cursor_x = 0
+   local cursor_y = 0
+   local height
+   for _, e in ipairs(scene) do
+      _, height = UI.draw_element(e, cursor_x, cursor_y)
+      cursor_y = cursor_y + height
+   end
+end
+
+function UI.draw_element(e, x, y)
+   local width, height = 0, 0
+   if e.type == "label" then
+      width = font:getWidth(e.text()) + 2 * margin
+      height = font:getHeight()
+      color("text", "normal") 
+      love.graphics.printf(e.text(), x, y, width, "left")
+   elseif e.type == "button" then
+      width, height = drawFrame(x, y, margin, e.text(), 
+         c.background[e.state], c.text[e.state])
+   elseif e.type == "horizontal" then
+      local max_height = 0
+      local old_x = x
+      for _, e_inner in ipairs(e) do
+         width, height = UI.draw_element(e_inner, x, y)
+         max_height = math.max(max_height, height)
+         x = x + round_to_grid(width)
+      end
+      width = x - old_x
+      height = max_height
+   end
+   return round_to_grid(width), round_to_grid(height)
+end
+
+---
 
 function UI:draw ()
    local r,g,b,a = love.graphics.getColor()
@@ -291,6 +364,7 @@ function drawFrame ( x, y, margin, text, cback, ctext )
    )
    love.graphics.setColor( ctext )
    love.graphics.print( text, x + margin, y + margin )
+   return font:getWidth(text) + 2 * margin, font:getHeight() + 2 * margin
 end
 
 return UI
