@@ -8,11 +8,4 @@ Type `make` to see the capabilities of the library.
 
 ## Example
 
-Button:
-```lua
-
-```
-
-Slider:
-
-
+![Example of UI][ "example.png" ]
