@@ -8,9 +8,6 @@ Demo code is inside `main.lua` file.
 Type `make` inside cloned repo to test the capabilities of the library.
 
 ## Example
-
-![Example of UI](example.png)
-
 ```lua
  -- Set up variables used as labels (note the curly brackets)
  explosives = {15}
@@ -42,6 +39,6 @@ Type `make` inside cloned repo to test the capabilities of the library.
     UI:addLabel( boom ) 
  )
 ```
-
+![Example of UI](example.png)
 
 *Written in [Lua](https://www.lua.org/) using awesome [love2d](https://love2d.org/) framework.*
