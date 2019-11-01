@@ -27,9 +27,9 @@ function love.draw()
       UI.label { "  Select amount of explosives" },
       UI.label { "Do whatever you want" },
       UI.slider( 0, 100, explosives ),
-      UI.horizontal {  
-         UI.button( "Load explosives", loadCannon ), 
-         UI.button( "Set fire", setFire )
+      UI.horizontal { 
+         UI.button( "Load explosives", loadCannon ),
+         UI.button( "Set fire", setFire ),
       },
       UI.label( boom ),
    }

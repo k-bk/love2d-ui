@@ -2,18 +2,25 @@
 -- SIMPLE UI LIBRARY
 ---------------------------------
 
-local UI = { scene = {} }
+local UI = { 
+   pressed = false,
+   position = { x=0, y=0 },
+   click = { x=0, y=0 },
+   scene = {},
+}
 
 local c = 
    { background = 
       { normal = { 1,1,1 } 
       , hover = { 102/255, 173/255, 87/255 }
-      , active = { 51/255, 51/255, 51/255 }
+      , pressed = { 51/255, 51/255, 51/255 }
+      , released = { 51/255, 51/255, 51/255 }
       } 
    , text = 
       { normal = { 153/255, 153/255, 153/255 }
       , hover = { 1,1,1 }
-      , active = { 1,1,1 }
+      , pressed = { 1,1,1 }
+      , released = { 1,1,1 }
       }
    , border =
       { 217/255, 217/255, 217/255 }
@@ -61,6 +68,15 @@ function UI.button(text, fun)
 end
 
 function draw_button(e, x, y)
+   width, height = drawFrame(x, y, margin, e.text(), 
+      c.background[e.state], c.text[e.state])
+   e.state = get_state({ x=x, y=y, width=width, height=height })
+   if e.state == "released" then
+      UI.released = false
+      if e.on_click then
+         e.on_click()
+      end
+   end
    width, height = drawFrame(x, y, margin, e.text(), 
       c.background[e.state], c.text[e.state])
    return width, height
@@ -164,59 +180,33 @@ function UI.draw_element(e, x, y)
    return round_to_grid(width), round_to_grid(height)
 end
 
-function UI:mousePressed ( position )
-   self.pressed = {}
-   for _,b in ipairs( self.scene ) do
-      if b.type == "button" then
-         if b.onClick and pointInAABB( position, b ) then
-            b.state = "active"
-            table.insert( self.pressed, b )
-         end
-      elseif b.type == "slider" and b.state == "hover" then
-         b.state = "active"
-         table.insert( self.pressed, b )
+function get_state(e)
+   if pointInAABB(UI.position, e) then
+      if UI.pressed and pointInAABB(UI.click, e) then
+         return "pressed"
+      elseif UI.released and pointInAABB(UI.click, e) then
+         return "released"
+      else
+         return "hover"
       end
    end
+   return "normal"
 end
 
-function UI:mouseReleased ( position )
-   for _,b in ipairs( self.pressed ) do
-      if b.type == "slider" then
-         b.state = "normal"
-      elseif pointInAABB( position, b ) then
-         b.onClick()
-         b.state = "hover"
-      end
-   end
+function UI:mousePressed (position)
+   self.pressed = true
+   self.position = position
+   self.click = position
+end
+
+function UI:mouseReleased (position)
+   self.pressed = false
+   self.released = true
 end
 
 
-function UI:mouseMoved ( position )
-   for _,b in ipairs( self.scene ) do
-      if b.type == "button" then
-         if b.state ~= "active" then
-            if pointInAABB( position, b ) then
-               b.state = "hover"
-            else
-               b.state = "normal"
-            end
-         end
-      elseif b.type == "slider" then
-         local percent = 
-            clamp( 0, b.width, position.x - b.x ) / b.width
-         if b.state == "active" then
-            if pointInAABB( position, b ) then
-               b.value[1] = percent * (b.max - b.min) + b.min
-            end
-         else
-            if pointInAABB( position, b.circle() ) then
-               b.state = "hover"
-            else 
-               b.state = "normal"
-            end
-         end
-      end
-   end
+function UI:mouseMoved (position)
+   self.position = position
 end
 
 function pointInAABB ( point, box )
