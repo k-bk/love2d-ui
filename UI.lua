@@ -105,8 +105,8 @@ function draw_slider(e, x, y)
          y, smargin, e.max, "normal")
    end
 
-   drawFrame(circle.xc - font:getWidth(e.value()) / 2,
-      y, smargin, e.value(), "hover")
+   drawFrame(circle.xc - font:getWidth(e.value()) / 2, y, 
+      smargin, e.value(), "hover")
    color("background", "hover") 
    love.graphics.rectangle("fill", x, y + 3 * margin, e.width * percent,
       margin, corner, corner)
@@ -220,24 +220,26 @@ function clamp ( min, max, value )
    return value
 end
 
-function drawFrame (x, y, margin, text, state)
+function drawFrame (x, y, margin, text, state, align)
+   local align = align or "left"
+   local text_width = font:getWidth(text)
+   local frame_width = text_width + 2*margin
+   local frame_height = font:getHeight(text) + 2*margin
+   if align == "right" then
+      x = x + frame_width 
+   elseif align == "center" then
+      x = x + frame_width / 2
+   end
+
    color("background", state)
-   love.graphics.rectangle( "fill"
-      , x, y
-      , font:getWidth( text ) + 2 * margin
-      , font:getHeight() + 2 * margin
-      , corner, corner 
-   )
+   love.graphics.rectangle( 
+      "fill", x, y, frame_width, frame_height, corner, corner)
    love.graphics.setColor( c.border )
-   love.graphics.rectangle( "line"
-      , x, y
-      , font:getWidth( text ) + 2 * margin
-      , font:getHeight() + 2 * margin
-      , corner, corner 
-   )
+   love.graphics.rectangle( 
+      "line", x, y, frame_width, frame_height, corner, corner)
    color("text", state)
-   love.graphics.print( text, x + margin, y + margin )
-   return font:getWidth(text) + 2 * margin, font:getHeight() + 2 * margin
+   love.graphics.print(text, x + margin, y + margin)
+   return frame_width, frame_height 
 end
 
 return UI
