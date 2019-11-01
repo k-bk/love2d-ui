@@ -182,8 +182,12 @@ end
 
 function get_state(e)
    if pointInAABB(UI.position, e) then
-      if UI.pressed and pointInAABB(UI.click, e) then
-         return "pressed"
+      if UI.pressed then
+         if pointInAABB(UI.click, e) then
+            return "pressed"
+         else
+            return "normal"
+         end
       elseif UI.released and pointInAABB(UI.click, e) then
          return "released"
       else
@@ -193,28 +197,27 @@ function get_state(e)
    return "normal"
 end
 
-function UI:mousePressed (position)
-   self.pressed = true
-   self.position = position
-   self.click = position
+function UI.mousepressed(position)
+   UI.pressed = true
+   UI.position = position
+   UI.click = position
 end
 
-function UI:mouseReleased (position)
-   self.pressed = false
-   self.released = true
+function UI.mousereleased(position)
+   UI.pressed = false
+   UI.released = true
 end
 
 
-function UI:mouseMoved (position)
-   self.position = position
+function UI.mousemoved(position)
+   UI.position = position
 end
 
-function pointInAABB ( point, box )
-   return 
-      point.x >= box.x and 
-      point.x <= box.x + box.width and
-      point.y >= box.y and 
-      point.y <= box.y + box.height
+function pointInAABB(point, box)
+   return point.x >= box.x 
+      and point.x <= box.x + box.width
+      and point.y >= box.y
+      and point.y <= box.y + box.height
 end
 
 function clamp ( min, max, value )

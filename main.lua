@@ -39,16 +39,16 @@ end
 
 function love.mousepressed ( x, y, button )
     if button == 1 then
-        UI:mousePressed {x = x, y = y}
+        UI.mousepressed {x = x, y = y}
     end
 end
 
 function love.mousereleased ( x, y, button )
     if button == 1 then
-        UI:mouseReleased {x = x, y = y}
+        UI.mousereleased {x = x, y = y}
     end
 end
 
 function love.mousemoved ( x, y )
-    UI:mouseMoved {x = x, y = y}
+    UI.mousemoved {x = x, y = y}
 end
