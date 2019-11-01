@@ -19,22 +19,6 @@ function love.load()
       end
    end
    
-   UI:addScene(20, 20)
-   UI:vertical(
-      UI:addLabel {"Cannon simulator:"},
-      UI:addLabel {"  Select amount of explosives"},
-      UI:addSlider( 0, 100, explosives ),
-      UI:addLabel {""}
-   )
-   UI:horizontal(
-      UI:addButton( "Load explosives", loadCannon ), 
-      UI:addButton( "Set fire", setFire )
-   )
-   UI:vertical( 
-      UI:addLabel {""},
-      UI:addLabel( boom ) 
-   )
-
 end
 
 function love.draw()
@@ -50,7 +34,6 @@ function love.draw()
       UI.label( boom ),
    }
 end
-
 
 -- Some boilerplate necessary to make the sliders and buttons work
 
