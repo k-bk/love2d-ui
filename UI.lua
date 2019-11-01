@@ -36,26 +36,6 @@ function round_to_grid(value)
    return math.ceil(value / grid_size) * grid_size
 end
 
-function UI:addParagraph ( lines ) return function()
-   self.y = self.y + gap
-   for i = 1,#lines do
-      local t = 
-         { type = "text"
-         , x = self.x, y = self.y
-         , text = function () return lines[i] end 
-         , width = font:getWidth( lines[i] ) +  margin
-         , height = font:getHeight() +  margin
-         }
-      self.y = self.y + t.height
-      table.insert( self.scene, t )
-   end
-   lastGap = gap
-   return t
-end
-end
-
--- TODO: rewrite function to use this kind of input
-
 function UI.label(text)
    return { 
       type = "label", 
