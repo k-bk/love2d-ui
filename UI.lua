@@ -63,6 +63,14 @@ function UI.label(text)
    }
 end
 
+function draw_label(e, x, y)
+   width = font:getWidth(e.text()) + 2 * margin
+   height = font:getHeight()
+   color("text", "normal") 
+   love.graphics.printf(e.text(), x, y, width, "left")
+   return width, height
+end
+
 function UI.button(text, fun) 
    return { 
       type = "button",
@@ -70,6 +78,12 @@ function UI.button(text, fun)
       on_click = fun,
       state = "normal",
    }
+end
+
+function draw_button(e, x, y)
+   width, height = drawFrame(x, y, margin, e.text(), 
+      c.background[e.state], c.text[e.state])
+   return width, height
 end
 
 function UI.slider(min, max, value) 
@@ -81,6 +95,54 @@ function UI.slider(min, max, value)
       width = 200,
       state = "normal",
    }
+end
+
+function draw_slider(e, x, y)
+   local percent = (e.value() - e.min) / (e.max - e.min) 
+   local circle = { 
+      x = x + e.width * percent - radius, 
+      y = y + 2.5 * margin, 
+      width = 2 * radius, 
+      height = 2 * radius, 
+      xc = x + e.width * percent, 
+      yc = y + margin * 3.5,
+   }
+   if percent > 0.1 then
+      drawFrame(
+         x, y, smargin, e.min, c.background["normal"], c.text["normal"])
+   end
+   if percent < 0.9 then
+      drawFrame(x + e.width - font:getWidth(e.max) - 2 * smargin,
+         y, smargin, e.max, c.background["normal"], c.text["normal"])
+   end
+
+   drawFrame(x + e.width * percent - font:getWidth(e.value()) / 2,
+      y, smargin, e.value(), c.background["hover"], c.text["hover"])
+   color("background", "hover") 
+   love.graphics.rectangle("fill", x, y + 3 * margin, e.width * percent,
+      margin, corner, corner)
+   love.graphics.setColor(c.border) 
+   love.graphics.rectangle("line", x, y + 3 * margin, e.width,
+      margin, corner, corner)
+   local space = (e.width - 2 * margin) / 5
+   local spaceval = (e.max - e.min) / 5
+   for i = 0, 5 do
+      love.graphics.setColor(c.border) 
+      love.graphics.line(x + margin + i * space, y + 4 * margin, 
+         x + margin + i * space, y + 5 * margin)
+      love.graphics.setColor(c.text["normal"]) 
+      local cur = e.min + i * spaceval
+      love.graphics.print(e.min + i * spaceval, 
+         x + margin + i * space - font:getWidth(cur) / 2, y + 6 * margin)
+   end
+
+   love.graphics.setColor(c.background[e.state]) 
+   love.graphics.circle("fill", circle.xc, circle.yc, radius)
+   love.graphics.setColor(c.border) 
+   love.graphics.circle("line", circle.xc, circle.yc, radius)
+   width = e.width
+   height = 8 * margin
+   return width, height
 end
 
 function UI.horizontal(content) 
@@ -103,58 +165,11 @@ end
 function UI.draw_element(e, x, y)
    local width, height = 0, 0
    if e.type == "label" then
-      width = font:getWidth(e.text()) + 2 * margin
-      height = font:getHeight()
-      color("text", "normal") 
-      love.graphics.printf(e.text(), x, y, width, "left")
+      width, height = draw_label(e, x, y)
    elseif e.type == "button" then
-      width, height = drawFrame(x, y, margin, e.text(), 
-         c.background[e.state], c.text[e.state])
+      width, height = draw_button(e, x, y)
    elseif e.type == "slider" then
-      local percent = (e.value() - e.min) / (e.max - e.min) 
-      local circle = { 
-         x = x + e.width * percent - radius, 
-         y = y + 2.5 * margin, 
-         width = 2 * radius, 
-         height = 2 * radius, 
-         xc = x + e.width * percent, 
-         yc = y + margin * 3.5,
-      }
-      if percent > 0.1 then
-         drawFrame(
-            x, y, smargin, e.min, c.background["normal"], c.text["normal"])
-      end
-      if percent < 0.9 then
-         drawFrame(x + e.width - font:getWidth(e.max) - 2 * smargin,
-            y, smargin, e.max, c.background["normal"], c.text["normal"])
-      end
-
-      drawFrame(x + e.width * percent - font:getWidth(e.value()) / 2,
-         y, smargin, e.value(), c.background["hover"], c.text["hover"])
-      color("background", "hover") 
-      love.graphics.rectangle("fill", x, y + 3 * margin, e.width * percent,
-         margin, corner, corner)
-      love.graphics.setColor(c.border) 
-      love.graphics.rectangle("line", x, y + 3 * margin, e.width,
-         margin, corner, corner)
-      local space = (e.width - 2 * margin) / 5
-      local spaceval = (e.max - e.min) / 5
-      for i = 0, 5 do
-         love.graphics.setColor(c.border) 
-         love.graphics.line(x + margin + i * space, y + 4 * margin, 
-            x + margin + i * space, y + 5 * margin)
-         love.graphics.setColor(c.text["normal"]) 
-         local cur = e.min + i * spaceval
-         love.graphics.print(e.min + i * spaceval, 
-            x + margin + i * space - font:getWidth(cur) / 2, y + 6 * margin)
-      end
-
-      love.graphics.setColor(c.background[e.state]) 
-      love.graphics.circle("fill", circle.xc, circle.yc, radius)
-      love.graphics.setColor(c.border) 
-      love.graphics.circle("line", circle.xc, circle.yc, radius)
-      width = e.width
-      height = 8 * margin
+      width, height = draw_slider(e, x, y)
    elseif e.type == "horizontal" then
       local max_height = 0
       local old_x = x
