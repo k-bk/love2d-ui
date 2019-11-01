@@ -68,8 +68,7 @@ function UI.button(text, fun)
 end
 
 function draw_button(e, x, y)
-   width, height = drawFrame(x, y, margin, e.text(), 
-      c.background[e.state], c.text[e.state])
+   width, height = drawFrame(x, y, margin, e.text(), e.state)
    e.state = get_state({ x=x, y=y, width=width, height=height })
    if e.state == "released" then
       UI.released = false
@@ -77,8 +76,7 @@ function draw_button(e, x, y)
          e.on_click()
       end
    end
-   width, height = drawFrame(x, y, margin, e.text(), 
-      c.background[e.state], c.text[e.state])
+   width, height = drawFrame(x, y, margin, e.text(), e.state)
    return width, height
 end
 
@@ -96,40 +94,36 @@ end
 function draw_slider(e, x, y)
    local percent = (e.value() - e.min) / (e.max - e.min) 
    local circle = { 
-      x = x + e.width * percent - radius, 
-      y = y + 2.5 * margin, 
-      width = 2 * radius, 
-      height = 2 * radius, 
       xc = x + e.width * percent, 
       yc = y + margin * 3.5,
    }
    if percent > 0.1 then
-      drawFrame(
-         x, y, smargin, e.min, c.background["normal"], c.text["normal"])
+      drawFrame(x, y, smargin, e.min, "normal")
    end
    if percent < 0.9 then
       drawFrame(x + e.width - font:getWidth(e.max) - 2 * smargin,
-         y, smargin, e.max, c.background["normal"], c.text["normal"])
+         y, smargin, e.max, "normal")
    end
 
-   drawFrame(x + e.width * percent - font:getWidth(e.value()) / 2,
-      y, smargin, e.value(), c.background["hover"], c.text["hover"])
+   drawFrame(circle.xc - font:getWidth(e.value()) / 2,
+      y, smargin, e.value(), "hover")
    color("background", "hover") 
    love.graphics.rectangle("fill", x, y + 3 * margin, e.width * percent,
       margin, corner, corner)
    love.graphics.setColor(c.border) 
    love.graphics.rectangle("line", x, y + 3 * margin, e.width,
       margin, corner, corner)
+
    local space = (e.width - 2 * margin) / 5
    local spaceval = (e.max - e.min) / 5
-   for i = 0, 5 do
+   local top_y = y + 4*margin
+   local val = e.min
+   for offset = margin, e.width - margin, space do
       love.graphics.setColor(c.border) 
-      love.graphics.line(x + margin + i * space, y + 4 * margin, 
-         x + margin + i * space, y + 5 * margin)
+      love.graphics.line(x + offset, top_y, x + offset, top_y + margin)
       love.graphics.setColor(c.text["normal"]) 
-      local cur = e.min + i * spaceval
-      love.graphics.print(e.min + i * spaceval, 
-         x + margin + i * space - font:getWidth(cur) / 2, y + 6 * margin)
+      val = val + spaceval
+      love.graphics.printf(val, x + offset - 50, top_y + margin, 100, "center")
    end
 
    love.graphics.setColor(c.background[e.state]) 
@@ -226,8 +220,8 @@ function clamp ( min, max, value )
    return value
 end
 
-function drawFrame ( x, y, margin, text, cback, ctext )
-   love.graphics.setColor( cback )
+function drawFrame (x, y, margin, text, state)
+   color("background", state)
    love.graphics.rectangle( "fill"
       , x, y
       , font:getWidth( text ) + 2 * margin
@@ -241,7 +235,7 @@ function drawFrame ( x, y, margin, text, cback, ctext )
       , font:getHeight() + 2 * margin
       , corner, corner 
    )
-   love.graphics.setColor( ctext )
+   color("text", state)
    love.graphics.print( text, x + margin, y + margin )
    return font:getWidth(text) + 2 * margin, font:getHeight() + 2 * margin
 end
