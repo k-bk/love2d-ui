@@ -22,7 +22,7 @@ function love.load()
 end
 
 function love.draw()
-   UI.draw_new {
+   UI.draw {
       UI.label { "Cannon simulator:" },
       UI.label { "  Select amount of explosives" },
       UI.label { "Do whatever you want" },

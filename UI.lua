@@ -146,7 +146,7 @@ function UI.horizontal(content)
    return content 
 end
 
-function UI.draw_new(scene)
+function UI.draw(scene)
    local r,g,b,a = love.graphics.getColor()
    local cursor_x = 0
    local cursor_y = 0
