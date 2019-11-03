@@ -26,9 +26,7 @@ local c =
       { 217/255, 217/255, 217/255 }
    }
 
-function color(what, action)
-   love.graphics.setColor(c[what][action])
-end
+local color = love.graphics.setColor
 
 -- everything should be set according to the grid
 local grid_size = 5
@@ -43,7 +41,7 @@ function round_to_grid(value)
    return math.ceil(value / grid_size) * grid_size
 end
 
-function UI.label(text)
+function UI.label(text, align)
    return { 
       type = "label", 
       text = function () return text[1] end,
@@ -51,9 +49,9 @@ function UI.label(text)
 end
 
 function draw_label(e, x, y)
-   width = font:getWidth(e.text()) + 2 * margin
-   height = font:getHeight()
-   color("text", "normal") 
+   local width = font:getWidth(e.text()) + 2 * margin
+   local height = font:getHeight()
+   color(c.text.normal) 
    love.graphics.printf(e.text(), x, y, width, "left")
    return width, height
 end
@@ -68,7 +66,7 @@ function UI.button(text, fun)
 end
 
 function draw_button(e, x, y)
-   width, height = drawFrame(x, y, margin, e.text(), e.state)
+   local width, height = drawFrame(x, y, margin, e.text(), e.state)
    e.state = get_state({ x=x, y=y, width=width, height=height }, pointInAABB)
    if e.state == "released" then
       UI.released = false
@@ -94,55 +92,56 @@ function draw_slider(e, x, y)
    local old_y = y
    local percent = (e.value() - e.min) / (e.max - e.min) 
    local circle = { 
-      x = x + margin + (e.width - 2*margin) * percent, 
+      x = x + margin + e.width * percent, 
       y = y + margin * 3.5, 
       radius = radius,
    }
 
-   local state = get_state(circle, pointInCircle)
-   love.graphics.setColor(c.background[e.state]) 
+   local width = e.width + 2 * margin
+   local height = 7 * margin
+
+   local state = get_state({ x=x, y=y, width=width, height=height }, pointInAABB)
    if state == "pressed" then
-      local new_percent = (UI.position.x - x - margin) / (e.width - 2*margin)
-      new_percent = clamp(e.min, e.max, new_percent)
+      local new_percent = (UI.position.x - x - margin) / e.width
+      new_percent = clamp(0, 1, new_percent)
       e.set_value(new_percent * (e.max - e.min) + e.min)
    end
 
-   if percent > 0.1 then
+   -- draw labels with minimum and maximum
+   if percent > 0.05 then
       drawFrame(x, y, smargin, e.min, "normal", "left")
    end
-   if percent < 0.9 then
-      drawFrame(x + e.width, y, smargin, e.max, "normal", "right")
+   if percent < 0.95 then
+      drawFrame(x + e.width + 2*margin, y, smargin, e.max, "normal", "right")
    end
 
    drawFrame(circle.x, y, smargin, e.value(), "hover", "center")
-   color("background", "hover") 
+   color(c.background.hover)
 
    y = y + 3 * margin
-   love.graphics.rectangle("fill", x, y, e.width * percent,
+   love.graphics.rectangle("fill", x, y, margin + e.width * percent,
       margin, corner, corner)
-   love.graphics.setColor(c.border) 
-   love.graphics.rectangle("line", x, y, e.width,
+   color(c.border) 
+   love.graphics.rectangle("line", x, y, width,
       margin, corner, corner)
 
-   local space = (e.width - 2 * margin) / 5
+   local space = e.width / 5
    local spaceval = (e.max - e.min) / 5
    local val = e.min
    y = y + 2 * margin 
-   for offset = margin, e.width - margin, space do
-      love.graphics.setColor(c.border) 
+   for offset = margin, e.width + margin, space do
+      color(c.border) 
       love.graphics.line(x + offset, y - margin, x + offset, y)
-      love.graphics.setColor(c.text["normal"]) 
-      love.graphics.printf(val, x + offset - 50, y, 100, "center")
+      color(c.text.normal) 
+      love.graphics.printf(("%g"):format(val), x + offset - 50, y, 100, "center")
       val = val + spaceval
    end
 
-   color("background", state)
+   color(c.background[get_state(circle, pointInCircle)])
    love.graphics.circle("fill", circle.x, circle.y, radius)
-   love.graphics.setColor(c.border) 
+   color(c.border) 
    love.graphics.circle("line", circle.x, circle.y, radius)
 
-   local width = e.width
-   local height = y + 2 * margin - old_y 
    return width, height 
 end
 
@@ -160,7 +159,7 @@ function UI.draw(scene)
       _, height = UI.draw_element(e, cursor_x, cursor_y)
       cursor_y = cursor_y + height
    end
-   love.graphics.setColor(r,g,b,a)
+   color(r,g,b,a)
 end
 
 function UI.draw_element(e, x, y)
@@ -185,15 +184,15 @@ function UI.draw_element(e, x, y)
    return round_to_grid(width), round_to_grid(height)
 end
 
-function get_state(e, inside_shape)
-   if inside_shape(UI.position, e) then
+function get_state(e, in_shape)
+   if in_shape(UI.position, e) then
       if UI.pressed then
-         if inside_shape(UI.click, e) then
+         if in_shape(UI.click, e) then
             return "pressed"
          else
             return "normal"
          end
-      elseif UI.released and inside_shape(UI.click, e) then
+      elseif UI.released and in_shape(UI.click, e) then
          return "released"
       else
          return "hover"
@@ -246,13 +245,13 @@ function drawFrame (x, y, margin, text, state, align)
       x = x - frame_width / 2
    end
 
-   color("background", state)
+   color(c.background[state])
    love.graphics.rectangle( 
       "fill", x, y, frame_width, frame_height, corner, corner)
-   love.graphics.setColor( c.border )
+   color(c.border)
    love.graphics.rectangle( 
       "line", x, y, frame_width, frame_height, corner, corner)
-   color("text", state)
+   color(c.text[state])
    love.graphics.print(text, x + margin, y + margin)
    return frame_width, frame_height 
 end

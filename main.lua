@@ -18,11 +18,9 @@ function love.load()
          boom[1] = "BOOM!" 
       end
    end
-   
-end
 
-function love.draw()
-   UI.draw { x = 30, y = 30,
+   view = 
+   { x = 30, y = 30,
       UI.label { "Cannon simulator:" },
       UI.label { "  Select amount of explosives" },
       UI.label { "Do whatever you want" },
@@ -33,6 +31,11 @@ function love.draw()
       },
       UI.label( boom ),
    }
+   
+end
+
+function love.draw()
+   UI.draw(view)
 end
 
 -- Some boilerplate necessary to make the sliders and buttons work
