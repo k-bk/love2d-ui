@@ -4,18 +4,17 @@ function love.load()
 
    love.graphics.setBackgroundColor( 1, 1, 1 )
 
-   -- Set up variables used as labels (note the curly brackets)
+   -- Set up variables 
    explosives = {15}
-   boom = {"Not loaded"}
+   boom = "Not loaded"
 
    -- Set up functions for buttons
    function loadCannon () 
-      boom[1] = "Loaded" 
+      boom = "Loaded" 
    end
    function setFire ()
-      -- This ugly [1] access is necessary to make indirect reference
-      if boom[1] == "Loaded" then 
-         boom[1] = "BOOM!" 
+      if boom == "Loaded" then 
+         boom = "BOOM!" 
       end
    end
 
@@ -23,19 +22,19 @@ end
 
 function love.draw()
    UI.draw { x = 30, y = 30,
-      UI.label { "Cannon simulator:" },
-      UI.label { "  Select amount of explosives" },
-      UI.label { "Do whatever you want" },
-      UI.slider( 0, 100, explosives ),
+      UI.label { "Cannon simulator" },
+      UI.label { "  - Select amount of explosives:" },
+      UI.slider( 0, 100, explosives), -- 'explosives' has to be a table
       UI.horizontal { 
          UI.button( "Load explosives", loadCannon ),
          UI.button( "Set fire", setFire ),
       },
-      UI.label( boom ),
+      UI.label { boom },
+      UI.label { "  - Explosives used: "..explosives[1] },
    }
 end
 
--- Some boilerplate necessary to make the sliders and buttons work
+-- Some boilerplate necessary to make ui interactive 
 
 function love.mousepressed ( x, y, button )
     if button == 1 then
