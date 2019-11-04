@@ -1,8 +1,6 @@
 # love2d-ui
 Simple UI library for LÖVE framework.
 
----
-
 ### Features:
 - simple setup
 - written in functional manner, no global state
