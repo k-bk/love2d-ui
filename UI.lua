@@ -6,7 +6,6 @@ local UI = {
    pressed = false,
    position = { x=0, y=0 },
    click = { x=0, y=0 },
-   scene = {},
 }
 
 local c = 
@@ -67,7 +66,7 @@ end
 
 function draw_button(e, x, y)
    local width, height = drawFrame(x, y, margin, e.text(), e.state)
-   e.state = get_state({ x=x, y=y, width=width, height=height }, pointInAABB)
+   e.state = get_state(rectangle(x, y, width, height), pointInAABB)
    if e.state == "released" then
       UI.released = false
       e.on_click()
@@ -100,7 +99,7 @@ function draw_slider(e, x, y)
    local width = e.width + 2 * margin
    local height = 7 * margin
 
-   local state = get_state({ x=x, y=y, width=width, height=height }, pointInAABB)
+   local state = get_state(rectangle(x, y, width, height), pointInAABB)
    if state == "pressed" then
       local new_percent = (UI.position.x - x - margin) / e.width
       new_percent = clamp(0, 1, new_percent)
@@ -158,6 +157,7 @@ function UI.draw(scene)
    for _, e in ipairs(scene) do
       _, height = UI.draw_element(e, cursor_x, cursor_y)
       cursor_y = cursor_y + height
+      cursor_y = cursor_y + grid_size
    end
    color(r,g,b,a)
 end
@@ -177,11 +177,31 @@ function UI.draw_element(e, x, y)
          width, height = UI.draw_element(e_inner, x, y)
          max_height = math.max(max_height, height)
          x = x + round_to_grid(width)
+         x = x + grid_size
       end
       width = x - old_x
       height = max_height
    end
    return round_to_grid(width), round_to_grid(height)
+end
+
+function UI.mousepressed(position)
+   UI.pressed = true
+   UI.position = position
+   UI.click = position
+end
+
+function UI.mousereleased(position)
+   UI.pressed = false
+   UI.released = true
+end
+
+function UI.mousemoved(position)
+   UI.position = position
+end
+
+function rectangle(x, y, width, height)
+   return { x=x, y=y, width=width, height=height }
 end
 
 function get_state(e, in_shape)
@@ -199,22 +219,6 @@ function get_state(e, in_shape)
       end
    end
    return "normal"
-end
-
-function UI.mousepressed(position)
-   UI.pressed = true
-   UI.position = position
-   UI.click = position
-end
-
-function UI.mousereleased(position)
-   UI.pressed = false
-   UI.released = true
-end
-
-
-function UI.mousemoved(position)
-   UI.position = position
 end
 
 function pointInAABB(point, box)
