@@ -1,14 +1,25 @@
 # love2d-ui
-Simple UI library for LÖVE framework
+Simple UI library for LÖVE framework.
+
+Features:
+- simple setup
+- written in functional manner, no global state
+- hierarchical structure as input
+- compact syntax
 
 ## Run the demo
+Library is the `UI.lua` file.
+
 Demo code is inside `main.lua` file.
 
-**Linux**
+**Linux: **
+
 Type `make` inside cloned repo to test the capabilities of the library.
 
 ## Example
 ```lua
+local UI = require "UI"
+
 function love.load ()
    -- Set up variables used as labels (note the curly brackets)
    explosives = {15}
@@ -27,8 +38,7 @@ function love.load ()
 end
 
 function love.draw ()
-   UI = require "UI"
-   UI.draw_new {
+   UI.draw {
       UI.label { "Select amount of explosives" },
       UI.slider( 0, 100, explosives ),
       UI.horizontal {  
