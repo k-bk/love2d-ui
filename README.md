@@ -1,7 +1,7 @@
 # love2d-ui
 Simple UI library for LÖVE framework.
 
-### Features:
+#### Features:
 - simple setup
 - written in functional manner, no global state
 - hierarchical structure as input
@@ -12,8 +12,12 @@ Library is the `UI.lua` file.
 
 Demo code is inside `main.lua` file.
 
-### Linux:
+**Linux:**
 Type `make` inside cloned repo to test the capabilities of the library.
+
+## Usages:
+- [karolBak/love2d-double-pendulum](https://github.com/karolBak/love2d-double-pendulum)
+- [karolBak/love2d-lotka-volterra](https://github.com/karolBak/love2d-lotka-volterra)
 
 ## Example
 ```lua
