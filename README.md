@@ -26,16 +26,15 @@ local UI = require "UI"
 function love.load ()
    -- Set up variables used as labels (note the curly brackets)
    explosives = {15}
-   boom = {"Not loaded"}
+   boom = "Not loaded"
 
    -- Set up functions for buttons
    function loadCannon () 
-      boom[1] = "Loaded" 
+      boom = "Loaded" 
    end
    function setFire ()
-      -- This ugly [1] access is necessary to make indirect reference
-      if boom[1] == "Loaded" then 
-         boom[1] = "BOOM!" 
+      if boom == "Loaded" then 
+         boom = "BOOM!" 
       end
    end
 end
@@ -48,7 +47,7 @@ function love.draw ()
          UI.button( "Load explosives", loadCannon ), 
          UI.button( "Set fire", setFire )
       },
-      UI.label( boom ),
+      UI.label { boom },
    }
 end
 ```
