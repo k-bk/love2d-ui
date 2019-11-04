@@ -2,23 +2,33 @@
 -- SIMPLE UI LIBRARY
 ---------------------------------
 
-local UI = 
-   { scene = {} }
+local UI = { 
+   pressed = false,
+   position = { x=0, y=0 },
+   click = { x=0, y=0 },
+}
 
 local c = 
    { background = 
       { normal = { 1,1,1 } 
       , hover = { 102/255, 173/255, 87/255 }
-      , active = { 51/255, 51/255, 51/255 }
+      , pressed = { 51/255, 51/255, 51/255 }
+      , released = { 51/255, 51/255, 51/255 }
       } 
    , text = 
       { normal = { 153/255, 153/255, 153/255 }
       , hover = { 1,1,1 }
-      , active = { 1,1,1 }
+      , pressed = { 1,1,1 }
+      , released = { 1,1,1 }
       }
    , border =
       { 217/255, 217/255, 217/255 }
    }
+
+local color = love.graphics.setColor
+
+-- everything should be set according to the grid
+local grid_size = 5
 local gap = 5
 local margin = 10
 local smargin = 4 
@@ -26,246 +36,200 @@ local radius = 10
 local corner = 5
 local font = love.graphics.getFont()
 
-function UI:addScene ( x, y )
-   self.x = x
-   self.y = y
-   self.scene = {}
+function round_to_grid(value)
+   return math.ceil(value / grid_size) * grid_size
 end
 
-function UI:vertical ( e, ... )
-   e = e()
-   table.insert( self.scene, e )
-   self.y = self.y + lastGap 
-   if ... then
-      UI:vertical (...)
+function UI.label(text, align)
+   return { 
+      type = "label", 
+      text = function () return text[1] end,
+   }
+end
+
+function draw_label(e, x, y)
+   local width = font:getWidth(e.text()) + 2 * margin
+   local height = font:getHeight()
+   color(c.text.normal) 
+   love.graphics.printf(e.text(), x, y, width, "left")
+   return width, height
+end
+
+function UI.button(text, fun) 
+   return { 
+      type = "button",
+      text = function () return text end, 
+      on_click = fun,
+      state = "normal",
+   }
+end
+
+function draw_button(e, x, y)
+   local width, height = drawFrame(x, y, margin, e.text(), e.state)
+   e.state = get_state(rectangle(x, y, width, height), pointInAABB)
+   if e.state == "released" then
+      UI.released = false
+      e.on_click()
    end
+   width, height = drawFrame(x, y, margin, e.text(), e.state)
+   return width, height
 end
 
-function UI:horizontal ( e, ... )
-   e = e()
-   table.insert( self.scene, e )
-   self.x = self.x + e.width + gap
-   if ... then
-      UI:horizontal (...)
+function UI.slider(min, max, value) 
+   return { 
+      type = "slider",
+      value = function () return value[1] end,
+      set_value = function (val) value[1] = val end,
+      min = min,
+      max = max,
+      width = 200,
+      state = "normal",
+   }
+end
+
+function draw_slider(e, x, y)
+   local old_y = y
+   local percent = (e.value() - e.min) / (e.max - e.min) 
+   local circle = { 
+      x = x + margin + e.width * percent, 
+      y = y + margin * 3.5, 
+      radius = radius,
+   }
+
+   local width = e.width + 2 * margin
+   local height = 7 * margin
+
+   local state = get_state(rectangle(x, y, width, height), pointInAABB)
+   if state == "pressed" then
+      local new_percent = (UI.position.x - x - margin) / e.width
+      new_percent = clamp(0, 1, new_percent)
+      e.set_value(new_percent * (e.max - e.min) + e.min)
    end
-   self.x = self.x - e.width - gap
-end
 
-function UI:addButton ( text, fun ) return function ()
-   local b = 
-       { type = "button"
-       , x = self.x, y = self.y
-       , text = text, onClick = fun
-       , state = "normal"
-       , width = font:getWidth( text ) + 2 * margin
-       , height = font:getHeight() + 2 * margin
-       }
-   lastGap = b.height + gap
-   return b 
-end
-end
-
-function UI:addSlider ( min, max, value ) return function()
-   local s =
-      { type = "slider"
-      , x = self.x, y = self.y
-      , value = value 
-      , min = min
-      , max = max
-      , width = 200
-      , height = font:getHeight() + 4 * margin
-      , state = "normal"
-      }
-   s.percent = 
-      function () 
-         return (s.value[1] - s.min) / (s.max - s.min) 
-      end
-   s.circle = function () 
-      return
-         { x = s.x + s.width * s.percent() - radius
-         , y = s.y + 2.5 * margin
-         , width = 2 * radius
-         , height = 2 * radius
-         , xc = s.x + s.width * s.percent()
-         , yc = s.y + margin * 3.5 
-         }
+   -- draw labels with minimum and maximum
+   if percent > 0.05 then
+      drawFrame(x, y, smargin, e.min, "normal", "left")
    end
-   lastGap = s.height + gap
-   return s
-end
-end
-
-function UI:addLabel ( text ) return function()
-   local t = 
-      { type = "text"
-      , x = self.x, y = self.y + gap
-      , text = function () return text[1] end
-      , width = font:getWidth( text[1] ) + 2 * margin
-      , height = font:getHeight() + 2 * margin
-      }
-   lastGap = t.height + gap
-   return t
-end
-end
-
-function UI:addParagraph ( lines ) return function()
-   self.y = self.y + gap
-   for i = 1,#lines do
-      local t = 
-         { type = "text"
-         , x = self.x, y = self.y
-         , text = function () return lines[i] end 
-         , width = font:getWidth( lines[i] ) +  margin
-         , height = font:getHeight() +  margin
-         }
-      self.y = self.y + t.height
-      table.insert( self.scene, t )
+   if percent < 0.95 then
+      drawFrame(x + e.width + 2*margin, y, smargin, e.max, "normal", "right")
    end
-   lastGap = gap
-   return t
-end
+
+   drawFrame(circle.x, y, smargin, e.value(), "hover", "center")
+   color(c.background.hover)
+
+   y = y + 3 * margin
+   love.graphics.rectangle("fill", x, y, margin + e.width * percent,
+      margin, corner, corner)
+   color(c.border) 
+   love.graphics.rectangle("line", x, y, width,
+      margin, corner, corner)
+
+   local space = e.width / 5
+   local spaceval = (e.max - e.min) / 5
+   local val = e.min
+   y = y + 2 * margin 
+   for offset = margin, e.width + margin, space do
+      color(c.border) 
+      love.graphics.line(x + offset, y - margin, x + offset, y)
+      color(c.text.normal) 
+      love.graphics.printf(("%g"):format(val), x + offset - 50, y, 100, "center")
+      val = val + spaceval
+   end
+
+   color(c.background[get_state(circle, pointInCircle)])
+   love.graphics.circle("fill", circle.x, circle.y, radius)
+   color(c.border) 
+   love.graphics.circle("line", circle.x, circle.y, radius)
+
+   return width, height 
 end
 
-function UI:draw ()
+function UI.horizontal(content) 
+   content.type = "horizontal"
+   return content 
+end
+
+function UI.draw(scene)
    local r,g,b,a = love.graphics.getColor()
-   for i,b in ipairs( self.scene ) do
-      if b.type == "button" then
-         drawFrame( b.x, b.y, margin, b.text
-            , c.background[b.state], c.text[b.state]
-         )
-      elseif b.type == "text" then
-         love.graphics.setColor( c.text.normal ) 
-         love.graphics.printf( b.text()
-            , b.x, b.y + margin
-            , b.width, "left"
-            )
-      elseif b.type == "slider" then
-         local circle = b.circle() 
-         local percent = b.percent()
-         if percent > 0.1 then
-            drawFrame( b.x, b.y, smargin, b.min
-               , c.background["normal"], c.text["normal"]
-            )
-         end
-         if percent < 0.9 then
-            drawFrame( 
-               b.x + b.width 
-                   - font:getWidth( b.max ) 
-                   - 2 * smargin
-               , b.y, smargin, b.max
-               , c.background["normal"], c.text["normal"]
-               )
-         end
-         drawFrame( 
-            b.x + b.width * percent 
-                - font:getWidth( b.value[1] ) / 2
-            , b.y, smargin, b.value[1]
-            , c.background["hover"], c.text["hover"]
-            )
-         love.graphics.setColor( c.background["hover"] ) 
-         love.graphics.rectangle( "fill"
-            , b.x, b.y + 3 * margin
-            , b.width * percent
-            , margin
-            , corner, corner 
-            )
-         love.graphics.setColor( c.border ) 
-         love.graphics.rectangle( "line"
-            , b.x, b.y + 3 * margin
-            , b.width
-            , margin
-            , corner, corner 
-            )
-         local space = ( b.width - 2 * margin ) / 5
-         local spaceval = ( b.max - b.min ) / 5
-         for i = 0, 5 do
-            love.graphics.setColor( c.border ) 
-            love.graphics.line( 
-                 b.x + margin + i * space
-               , b.y + 4 * margin
-               , b.x + margin + i * space
-               , b.y + 5 * margin
-               )
-            love.graphics.setColor( c.text["normal"] ) 
-            local cur = b.min + i * spaceval
-            love.graphics.print( b.min + i * spaceval
-               , b.x + margin + i * space - font:getWidth(cur) / 2
-               , b.y + 6 * margin
-               )
-         end
-
-         love.graphics.setColor( c.background[b.state] ) 
-         love.graphics.circle( "fill"
-            , circle.xc, circle.yc, radius )
-         love.graphics.setColor( c.border ) 
-         love.graphics.circle( "line"
-            , circle.xc, circle.yc, radius )
-      end
+   local cursor_x = scene.x or 0
+   local cursor_y = scene.y or 0
+   local height
+   for _, e in ipairs(scene) do
+      _, height = UI.draw_element(e, cursor_x, cursor_y)
+      cursor_y = cursor_y + height
+      cursor_y = cursor_y + grid_size
    end
-   love.graphics.setColor( r,g,b,a )
+   color(r,g,b,a)
 end
 
-function UI:mousePressed ( position )
-   self.pressed = {}
-   for _,b in ipairs( self.scene ) do
-      if b.type == "button" then
-         if b.onClick and pointInAABB( position, b ) then
-            b.state = "active"
-            table.insert( self.pressed, b )
-         end
-      elseif b.type == "slider" and b.state == "hover" then
-         b.state = "active"
-         table.insert( self.pressed, b )
+function UI.draw_element(e, x, y)
+   local width, height = 0, 0
+   if e.type == "label" then
+      width, height = draw_label(e, x, y)
+   elseif e.type == "button" then
+      width, height = draw_button(e, x, y)
+   elseif e.type == "slider" then
+      width, height = draw_slider(e, x, y)
+   elseif e.type == "horizontal" then
+      local max_height = 0
+      local old_x = x
+      for _, e_inner in ipairs(e) do
+         width, height = UI.draw_element(e_inner, x, y)
+         max_height = math.max(max_height, height)
+         x = x + round_to_grid(width)
+         x = x + grid_size
       end
+      width = x - old_x
+      height = max_height
    end
+   return round_to_grid(width), round_to_grid(height)
 end
 
-function UI:mouseReleased ( position )
-   for _,b in ipairs( self.pressed ) do
-      if b.type == "slider" then
-         b.state = "normal"
-      elseif pointInAABB( position, b ) then
-         b.onClick()
-         b.state = "hover"
-      end
-   end
+function UI.mousepressed(position)
+   UI.pressed = true
+   UI.position = position
+   UI.click = position
 end
 
+function UI.mousereleased(position)
+   UI.pressed = false
+   UI.released = true
+end
 
-function UI:mouseMoved ( position )
-   for _,b in ipairs( self.scene ) do
-      if b.type == "button" then
-         if b.state ~= "active" then
-            if pointInAABB( position, b ) then
-               b.state = "hover"
-            else
-               b.state = "normal"
-            end
-         end
-      elseif b.type == "slider" then
-         local percent = 
-            clamp( 0, b.width, position.x - b.x ) / b.width
-         if b.state == "active" then
-            if pointInAABB( position, b ) then
-               b.value[1] = percent * (b.max - b.min) + b.min
-            end
+function UI.mousemoved(position)
+   UI.position = position
+end
+
+function rectangle(x, y, width, height)
+   return { x=x, y=y, width=width, height=height }
+end
+
+function get_state(e, in_shape)
+   if in_shape(UI.position, e) then
+      if UI.pressed then
+         if in_shape(UI.click, e) then
+            return "pressed"
          else
-            if pointInAABB( position, b.circle() ) then
-               b.state = "hover"
-            else 
-               b.state = "normal"
-            end
+            return "normal"
          end
+      elseif UI.released and in_shape(UI.click, e) then
+         return "released"
+      else
+         return "hover"
       end
    end
+   return "normal"
 end
 
-function pointInAABB ( point, box )
-   return 
-      point.x >= box.x and 
-      point.x <= box.x + box.width and
-      point.y >= box.y and 
-      point.y <= box.y + box.height
+function pointInAABB(point, box)
+   return point.x >= box.x 
+      and point.x <= box.x + box.width
+      and point.y >= box.y
+      and point.y <= box.y + box.height
+end
+
+function pointInCircle(point, circle)
+   return (point.x - circle.x)^2 + (point.y - circle.y)^2 <= circle.radius^2
 end
 
 function clamp ( min, max, value )
@@ -274,23 +238,26 @@ function clamp ( min, max, value )
    return value
 end
 
-function drawFrame ( x, y, margin, text, cback, ctext )
-   love.graphics.setColor( cback )
-   love.graphics.rectangle( "fill"
-      , x, y
-      , font:getWidth( text ) + 2 * margin
-      , font:getHeight() + 2 * margin
-      , corner, corner 
-   )
-   love.graphics.setColor( c.border )
-   love.graphics.rectangle( "line"
-      , x, y
-      , font:getWidth( text ) + 2 * margin
-      , font:getHeight() + 2 * margin
-      , corner, corner 
-   )
-   love.graphics.setColor( ctext )
-   love.graphics.print( text, x + margin, y + margin )
+function drawFrame (x, y, margin, text, state, align)
+   local align = align or "left"
+   local text_width = font:getWidth(text)
+   local frame_width = text_width + 2*margin
+   local frame_height = font:getHeight(text) + 2*margin
+   if align == "right" then
+      x = x - frame_width
+   elseif align == "center" then
+      x = x - frame_width / 2
+   end
+
+   color(c.background[state])
+   love.graphics.rectangle( 
+      "fill", x, y, frame_width, frame_height, corner, corner)
+   color(c.border)
+   love.graphics.rectangle( 
+      "line", x, y, frame_width, frame_height, corner, corner)
+   color(c.text[state])
+   love.graphics.print(text, x + margin, y + margin)
+   return frame_width, frame_height 
 end
 
 return UI

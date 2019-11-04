@@ -18,44 +18,37 @@ function love.load()
          boom[1] = "BOOM!" 
       end
    end
-   
-   UI:addScene(20, 20)
-   UI:vertical(
-      UI:addLabel {"Cannon simulator:"},
-      UI:addLabel {"  Select amount of explosives"},
-      UI:addSlider( 0, 100, explosives ),
-      UI:addLabel {""}
-   )
-   UI:horizontal(
-      UI:addButton( "Load explosives", loadCannon ), 
-      UI:addButton( "Set fire", setFire )
-   )
-   UI:vertical( 
-      UI:addLabel {""},
-      UI:addLabel( boom ) 
-   )
 
 end
 
 function love.draw()
-   UI:draw()
+   UI.draw { x = 30, y = 30,
+      UI.label { "Cannon simulator:" },
+      UI.label { "  Select amount of explosives" },
+      UI.label { "Do whatever you want" },
+      UI.slider( 0, 100, explosives ),
+      UI.horizontal { 
+         UI.button( "Load explosives", loadCannon ),
+         UI.button( "Set fire", setFire ),
+      },
+      UI.label( boom ),
+   }
 end
-
 
 -- Some boilerplate necessary to make the sliders and buttons work
 
 function love.mousepressed ( x, y, button )
     if button == 1 then
-        UI:mousePressed {x = x, y = y}
+        UI.mousepressed {x = x, y = y}
     end
 end
 
 function love.mousereleased ( x, y, button )
     if button == 1 then
-        UI:mouseReleased {x = x, y = y}
+        UI.mousereleased {x = x, y = y}
     end
 end
 
 function love.mousemoved ( x, y )
-    UI:mouseMoved {x = x, y = y}
+    UI.mousemoved {x = x, y = y}
 end
