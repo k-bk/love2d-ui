@@ -144,11 +144,6 @@ function draw_slider(e, x, y)
    return width, height 
 end
 
-function UI.horizontal(content) 
-   content.type = "horizontal"
-   return content 
-end
-
 function UI.draw(scene)
    local r,g,b,a = love.graphics.getColor()
    color(c.background.normal)
