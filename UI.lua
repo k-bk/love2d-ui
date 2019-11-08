@@ -151,11 +151,12 @@ end
 
 function UI.draw(scene)
    local r,g,b,a = love.graphics.getColor()
-   local cursor_x = scene.x or 0
-   local cursor_y = scene.y or 0
-   local height
-   UI.draw_element(scene, cursor_x, cursor_y, true)
+   color(c.background.normal)
+   local x = scene.x or 0
+   local y = scene.y or 0
+   local width, height = UI.draw_element(scene, x, y, true)
    color(r,g,b,a)
+   return width, height
 end
 
 function UI.draw_element(e, x, y, flow_down)

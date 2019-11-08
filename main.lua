@@ -2,7 +2,7 @@ local UI = require "UI"
 
 function love.load()
 
-   love.graphics.setBackgroundColor( 1, 1, 1 )
+   love.graphics.setBackgroundColor( 1,1,1 )
 
    -- Set up variables 
    explosives = {15}
