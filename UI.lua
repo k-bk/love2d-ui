@@ -154,33 +154,33 @@ function UI.draw(scene)
    local cursor_x = scene.x or 0
    local cursor_y = scene.y or 0
    local height
-   for _, e in ipairs(scene) do
-      _, height = UI.draw_element(e, cursor_x, cursor_y)
-      cursor_y = cursor_y + height
-      cursor_y = cursor_y + grid_size
-   end
+   UI.draw_element(scene, cursor_x, cursor_y, true)
    color(r,g,b,a)
 end
 
-function UI.draw_element(e, x, y)
-   local width, height = 0, 0
+function UI.draw_element(e, x, y, flow_down)
+   local width, height
    if e.type == "label" then
       width, height = draw_label(e, x, y)
    elseif e.type == "button" then
       width, height = draw_button(e, x, y)
    elseif e.type == "slider" then
       width, height = draw_slider(e, x, y)
-   elseif e.type == "horizontal" then
-      local max_height = 0
-      local old_x = x
+   else
+      -- change flow of the UI
+      local max_x, max_y = 0,0
       for _, e_inner in ipairs(e) do
-         width, height = UI.draw_element(e_inner, x, y)
-         max_height = math.max(max_height, height)
-         x = x + round_to_grid(width)
-         x = x + grid_size
+         width, height = 
+            UI.draw_element(e_inner, x, y, not flow_down)
+         if flow_down then
+            max_x = math.max(max_x, width)
+            y = y + round_to_grid(height) + grid_size
+         else
+            max_y = math.max(max_y, height)
+            x = x + round_to_grid(width) + grid_size
+         end
       end
-      width = x - old_x
-      height = max_height
+      width, height = max_x, max_y
    end
    return round_to_grid(width), round_to_grid(height)
 end

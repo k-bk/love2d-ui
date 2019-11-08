@@ -25,12 +25,20 @@ function love.draw()
       UI.label { "Cannon simulator" },
       UI.label { "  - Select amount of explosives:" },
       UI.slider( 0, 100, explosives), -- 'explosives' has to be a table
-      UI.horizontal { 
+      { 
          UI.button( "Load explosives", loadCannon ),
          UI.button( "Set fire", setFire ),
       },
       UI.label { boom },
       UI.label { "  - Explosives used: "..explosives[1] },
+      {
+         UI.label { "Best offer -->" }, 
+         { 
+            UI.button( "Get now!", function () end ), 
+            UI.button( "Remind later!", function () end ) 
+         },
+         UI.label { "<-- Best offer" },
+      }
    }
 end
 
