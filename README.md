@@ -43,7 +43,7 @@ function love.draw ()
    UI.draw {
       UI.label { "Select amount of explosives" },
       UI.slider( 0, 100, explosives ),
-      UI.horizontal {  
+      {  
          UI.button( "Load explosives", loadCannon ), 
          UI.button( "Set fire", setFire )
       },

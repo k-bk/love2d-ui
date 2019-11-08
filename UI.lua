@@ -167,11 +167,11 @@ function UI.draw_element(e, x, y, flow_down)
    elseif e.type == "slider" then
       width, height = draw_slider(e, x, y)
    else
-      -- change flow of the UI
+      -- draw nested UI 
+      local old_x, old_y = x,y
       local max_x, max_y = 0,0
       for _, e_inner in ipairs(e) do
-         width, height = 
-            UI.draw_element(e_inner, x, y, not flow_down)
+         width, height = UI.draw_element(e_inner, x, y, not flow_down)
          if flow_down then
             max_x = math.max(max_x, width)
             y = y + round_to_grid(height) + grid_size
@@ -180,7 +180,10 @@ function UI.draw_element(e, x, y, flow_down)
             x = x + round_to_grid(width) + grid_size
          end
       end
-      width, height = max_x, max_y
+      x = x + max_x
+      y = y + max_y
+      width = x - old_x
+      height = y - old_y 
    end
    return round_to_grid(width), round_to_grid(height)
 end

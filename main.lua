@@ -38,7 +38,9 @@ function love.draw()
             UI.button( "Remind later!", function () end ) 
          },
          UI.label { "<-- Best offer" },
-      }
+      },
+      UI.label { "Whatever, " },
+      UI.label { "  I am done. " },
    }
 end
 
