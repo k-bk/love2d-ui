@@ -36,7 +36,7 @@ local margin = 10
 local smargin = 4 
 local radius = 10
 local corner = 5
-local font = love.graphics.getFont()
+local font = font or love.graphics.getFont()
 
 function round_to_grid(value)
    return math.ceil(value / grid_size) * grid_size
