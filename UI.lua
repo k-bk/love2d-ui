@@ -6,6 +6,8 @@ local UI = {
    pressed = false,
    position = { x=0, y=0 },
    click = { x=0, y=0 },
+   prev_click = { x=0, y=0 },
+   recording = false,
 }
 
 local c = 
@@ -144,6 +146,51 @@ function draw_slider(e, x, y)
    return width, height 
 end
 
+function UI.dropdown(list, value)
+   return { 
+      type = "dropdown",
+      value = function () return value[1] end,
+      set_value = function (val) value[1] = val end,
+      list = list,
+      state = "normal",
+   }
+end
+
+function draw_dropdown(e, x, y)
+   local value = e.value() or "Choose option" 
+   local width, height = drawFrame(x, y, 0, value, e.state)
+   e.state = get_state(rectangle(x, y, width, height), pointInAABB)
+   if e.state == "released" then
+      UI.released = false
+   end
+   width, height = drawFrame(x, y, margin, value, e.state)
+   return width, height
+end
+
+function UI.inputbox(value)
+   return {
+      type = "inputbox",
+      value = function () return value[1] end,
+      set_value = function (val) value[1] = val end,
+      state = "normal"
+   }
+end
+
+function draw_inputbox(e, x, y)
+   local width = 150
+   local _, height = drawFrame(x, y, 3, e.value(), e.state)
+   e.state = get_state(rectangle(x, y, width, height), pointInAABB)
+   if e.state == "released" then
+      UI.released = false
+      UI.recording = "numbers"
+      textinput = e.value()
+   end
+   if UI.recording then
+      e.set_value(textinput)
+   end
+   return width, height
+end
+
 function UI.draw(scene)
    local r,g,b,a = love.graphics.getColor()
    color(c.background.normal)
@@ -162,6 +209,10 @@ function UI.draw_element(e, x, y, flow_down)
       width, height = draw_button(e, x, y)
    elseif e.type == "slider" then
       width, height = draw_slider(e, x, y)
+   elseif e.type == "dropdown" then
+      width, height = draw_dropdown(e, x, y)
+   elseif e.type == "inputbox" then
+      width, height = draw_inputbox(e, x, y)
    else
       -- draw nested UI 
       local old_x, old_y = x,y
@@ -185,9 +236,12 @@ function UI.draw_element(e, x, y, flow_down)
 end
 
 function UI.mousepressed(position)
+   UI.released = false
    UI.pressed = true
    UI.position = position
+   UI.prev_click = UI.click
    UI.click = position
+   UI.recording = false
 end
 
 function UI.mousereleased(position)
@@ -197,6 +251,21 @@ end
 
 function UI.mousemoved(position)
    UI.position = position
+end
+
+function UI.textinput(text)
+   if UI.recording == "text" then
+      textinput = textinput..text
+   elseif UI.recording == "numbers" then
+      local onlynumbers = text:gsub("%D", "")
+      textinput = textinput..onlynumbers
+   end
+end
+
+function UI.keypressed(key)
+   if key == "backspace" then
+      textinput = string.sub(textinput, 1, -2)
+   end
 end
 
 function rectangle(x, y, width, height)
@@ -218,6 +287,14 @@ function get_state(e, in_shape)
       end
    end
    return "normal"
+end
+
+function get_prev_state(e, in_shape)
+   if in_shape(UI.prev_click, e) then
+      return "pressed"
+   else
+      return "normal"
+   end
 end
 
 function pointInAABB(point, box)
