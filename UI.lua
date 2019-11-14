@@ -30,16 +30,16 @@ local c =
 local color = love.graphics.setColor
 
 -- everything should be set according to the grid
-local grid_size = 5
-local gap = 5
-local margin = 10
-local smargin = 4 
-local radius = 10
-local corner = 5
-local font = font or love.graphics.getFont()
+UI.grid_size = 5
+UI.gap = 5
+UI.margin = 10
+UI.smargin = 4 
+UI.radius = 10
+UI.corner = 5
+UI.font = love.graphics.getFont() 
 
 function round_to_grid(value)
-   return math.ceil(value / grid_size) * grid_size
+   return math.ceil(value / UI.grid_size) * UI.grid_size
 end
 
 function UI.label(text, align)
@@ -50,8 +50,8 @@ function UI.label(text, align)
 end
 
 function draw_label(e, x, y)
-   local width = font:getWidth(e.text()) + 2 * margin
-   local height = font:getHeight()
+   local width = UI.font:getWidth(e.text()) + 2 * UI.margin
+   local height = UI.font:getHeight()
    color(c.text.normal) 
    love.graphics.printf(e.text(), x, y, width, "left")
    return width, height
@@ -67,13 +67,13 @@ function UI.button(text, fun)
 end
 
 function draw_button(e, x, y)
-   local width, height = drawFrame(x, y, margin, e.text(), e.state)
+   local width, height = drawFrame(x, y, UI.margin, e.text(), e.state)
    e.state = get_state(rectangle(x, y, width, height), pointInAABB)
    if e.state == "released" then
       UI.released = false
       e.on_click()
    end
-   width, height = drawFrame(x, y, margin, e.text(), e.state)
+   width, height = drawFrame(x, y, UI.margin, e.text(), e.state)
    return width, height
 end
 
@@ -93,55 +93,55 @@ function draw_slider(e, x, y)
    local old_y = y
    local percent = (e.value() - e.min) / (e.max - e.min) 
    local circle = { 
-      x = x + margin + e.width * percent, 
-      y = y + margin * 3.5, 
-      radius = radius,
+      x = x + UI.margin + e.width * percent, 
+      y = y + UI.margin * 3.5, 
+      radius = UI.radius,
    }
 
-   local width = e.width + 2 * margin
-   local height = 7 * margin
+   local width = e.width + 2 * UI.margin
+   local height = 7 * UI.margin
 
    local state = get_state(rectangle(x, y, width, height), pointInAABB)
    if state == "pressed" then
-      local new_percent = (UI.position.x - x - margin) / e.width
+      local new_percent = (UI.position.x - x - UI.margin) / e.width
       new_percent = clamp(0, 1, new_percent)
       e.set_value(new_percent * (e.max - e.min) + e.min)
    end
 
    -- draw labels with minimum and maximum
    if percent > 0.05 then
-      drawFrame(x, y, smargin, e.min, "normal", "left")
+      drawFrame(x, y, UI.smargin, e.min, "normal", "left")
    end
    if percent < 0.95 then
-      drawFrame(x + e.width + 2*margin, y, smargin, e.max, "normal", "right")
+      drawFrame(x + e.width + 2*UI.margin, y, UI.smargin, e.max, "normal", "right")
    end
 
-   drawFrame(circle.x, y, smargin, e.value(), "hover", "center")
+   drawFrame(circle.x, y, UI.smargin, e.value(), "hover", "center")
    color(c.background.hover)
 
-   y = y + 3 * margin
-   love.graphics.rectangle("fill", x, y, margin + e.width * percent,
-      margin, corner, corner)
+   y = y + 3 * UI.margin
+   love.graphics.rectangle("fill", x, y, UI.margin + e.width * percent,
+      UI.margin, UI.corner, UI.corner)
    color(c.border) 
    love.graphics.rectangle("line", x, y, width,
-      margin, corner, corner)
+      UI.margin, UI.corner, UI.corner)
 
    local space = e.width / 5
    local spaceval = (e.max - e.min) / 5
    local val = e.min
-   y = y + 2 * margin 
-   for offset = margin, e.width + margin, space do
+   y = y + 2 * UI.margin 
+   for offset = UI.margin, e.width + UI.margin, space do
       color(c.border) 
-      love.graphics.line(x + offset, y - margin, x + offset, y)
+      love.graphics.line(x + offset, y - UI.margin, x + offset, y)
       color(c.text.normal) 
       love.graphics.printf(("%g"):format(val), x + offset - 50, y, 100, "center")
       val = val + spaceval
    end
 
    color(c.background[get_state(circle, pointInCircle)])
-   love.graphics.circle("fill", circle.x, circle.y, radius)
+   love.graphics.circle("fill", circle.x, circle.y, UI.radius)
    color(c.border) 
-   love.graphics.circle("line", circle.x, circle.y, radius)
+   love.graphics.circle("line", circle.x, circle.y, UI.radius)
 
    return width, height 
 end
@@ -163,7 +163,7 @@ function draw_dropdown(e, x, y)
    if e.state == "released" then
       UI.released = false
    end
-   width, height = drawFrame(x, y, margin, value, e.state)
+   width, height = drawFrame(x, y, UI.margin, value, e.state)
    return width, height
 end
 
@@ -221,10 +221,10 @@ function UI.draw_element(e, x, y, flow_down)
          width, height = UI.draw_element(e_inner, x, y, not flow_down)
          if flow_down then
             max_x = math.max(max_x, width)
-            y = y + round_to_grid(height) + grid_size
+            y = y + round_to_grid(height) + UI.grid_size
          else
             max_y = math.max(max_y, height)
-            x = x + round_to_grid(width) + grid_size
+            x = x + round_to_grid(width) + UI.grid_size
          end
       end
       x = x + max_x
@@ -316,9 +316,9 @@ end
 
 function drawFrame (x, y, margin, text, state, align)
    local align = align or "left"
-   local text_width = font:getWidth(text)
+   local text_width = UI.font:getWidth(text)
    local frame_width = text_width + 2*margin
-   local frame_height = font:getHeight(text) + 2*margin
+   local frame_height = UI.font:getHeight(text) + 2*margin
    if align == "right" then
       x = x - frame_width
    elseif align == "center" then
@@ -327,10 +327,10 @@ function drawFrame (x, y, margin, text, state, align)
 
    color(c.background[state])
    love.graphics.rectangle( 
-      "fill", x, y, frame_width, frame_height, corner, corner)
+      "fill", x, y, frame_width, frame_height, UI.corner, UI.corner)
    color(c.border)
    love.graphics.rectangle( 
-      "line", x, y, frame_width, frame_height, corner, corner)
+      "line", x, y, frame_width, frame_height, UI.corner, UI.corner)
    color(c.text[state])
    love.graphics.print(text, x + margin, y + margin)
    return frame_width, frame_height 
