@@ -146,27 +146,6 @@ function draw_slider(e, x, y)
    return width, height 
 end
 
-function UI.dropdown(list, value)
-   return { 
-      type = "dropdown",
-      value = function () return value[1] end,
-      set_value = function (val) value[1] = val end,
-      list = list,
-      state = "normal",
-   }
-end
-
-function draw_dropdown(e, x, y)
-   local value = e.value() or "Choose option" 
-   local width, height = drawFrame(x, y, 0, value, e.state)
-   e.state = get_state(rectangle(x, y, width, height), pointInAABB)
-   if e.state == "released" then
-      UI.released = false
-   end
-   width, height = drawFrame(x, y, UI.margin, value, e.state)
-   return width, height
-end
-
 function UI.inputbox(value)
    return {
       type = "inputbox",
