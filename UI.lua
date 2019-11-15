@@ -6,7 +6,6 @@ local UI = {
    pressed = false,
    position = { x=0, y=0 },
    click = { x=0, y=0 },
-   prev_click = { x=0, y=0 },
    recording = false,
 }
 
@@ -218,7 +217,6 @@ function UI.mousepressed(position)
    UI.released = false
    UI.pressed = true
    UI.position = position
-   UI.prev_click = UI.click
    UI.click = position
    UI.recording = false
 end
@@ -266,14 +264,6 @@ function get_state(e, in_shape)
       end
    end
    return "normal"
-end
-
-function get_prev_state(e, in_shape)
-   if in_shape(UI.prev_click, e) then
-      return "pressed"
-   else
-      return "normal"
-   end
 end
 
 function pointInAABB(point, box)
