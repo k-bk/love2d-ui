@@ -42,7 +42,6 @@ function love.draw()
       },
       UI.label { "<-- Best offer" },
    },
-   UI.dropdown( { "Bomb", "Gun", "Club" }, weapon ),
    UI.label { "Whatever, " },
    UI.label { "  I am done. " },
 }

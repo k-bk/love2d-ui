@@ -52,7 +52,7 @@ function draw_label(e, x, y)
    local width = UI.font:getWidth(e.text()) + 2 * UI.margin
    local height = UI.font:getHeight()
    color(c.text.normal) 
-   love.graphics.printf(e.text(), x, y, width, "left")
+   love.graphics.printf(e.text(), UI.font, x, y, width, "left")
    return width, height
 end
 
@@ -133,7 +133,7 @@ function draw_slider(e, x, y)
       color(c.border) 
       love.graphics.line(x + offset, y - UI.margin, x + offset, y)
       color(c.text.normal) 
-      love.graphics.printf(("%g"):format(val), x + offset - 50, y, 100, "center")
+      love.graphics.printf(("%g"):format(val), UI.font, x + offset - 50, y, 100, "center")
       val = val + spaceval
    end
 
@@ -301,7 +301,7 @@ function drawFrame (x, y, margin, text, state, align)
    love.graphics.rectangle( 
       "line", x, y, frame_width, frame_height, UI.corner, UI.corner)
    color(c.text[state])
-   love.graphics.print(text, x + margin, y + margin)
+   love.graphics.print(text, UI.font, x + margin, y + margin)
    return frame_width, frame_height 
 end
 
