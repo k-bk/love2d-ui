@@ -219,15 +219,21 @@ function UI.mousepressed(position)
    UI.position = position
    UI.click = position
    UI.recording = false
+
+   return position
 end
 
 function UI.mousereleased(position)
    UI.pressed = false
    UI.released = true
+
+   return position
 end
 
 function UI.mousemoved(position)
    UI.position = position
+
+   return position
 end
 
 function UI.textinput(text)
