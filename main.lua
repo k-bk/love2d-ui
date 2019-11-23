@@ -50,22 +50,21 @@ end
 -- Some boilerplate necessary to make ui interactive 
 
 function love.mousepressed(x, y, button)
-   local input = v2(x,y)
+   local input = { x = x, y = y }
    if button == 1 then
       input = UI.mousepressed(input)
-      input = lab.mousepressed(input)
    end
 end
 
 function love.mousereleased(x, y, button)
-   local input = v2(x,y)
+   local input = { x = x, y = y }
    if button == 1 then
       input = UI.mousereleased(input)
    end
 end
 
 function love.mousemoved(x, y)
-   local input = v2(x,y)
+   local input = { x = x, y = y }
    UI.mousemoved(input)
 end
 
