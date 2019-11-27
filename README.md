@@ -1,4 +1,4 @@
-# love2d-ui
+# love2d-ui [![love2d version](https://img.shields.io/badge/L%C3%96VE-11.3-27a9e0?labelColor=e74999)](https://love2d.org)
 Simple UI library for LÖVE framework.
 
 #### Features:
