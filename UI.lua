@@ -41,18 +41,19 @@ function round_to_grid(value)
    return math.ceil(value / UI.grid_size) * UI.grid_size
 end
 
-function UI.label(text, align)
+function UI.label(text, font)
    return { 
       type = "label", 
       text = function () return text[1] end,
+      font = font or UI.font
    }
 end
 
 function draw_label(e, x, y)
-   local width = UI.font:getWidth(e.text()) + 2 * UI.margin
-   local height = UI.font:getHeight()
+   local width = e.font:getWidth(e.text()) + 2 * UI.margin
+   local height = e.font:getHeight()
    color(c.text.normal) 
-   love.graphics.printf(e.text(), UI.font, x, y, width, "left")
+   love.graphics.printf(e.text(), e.font, x, y, width, "left")
    return width, height
 end
 

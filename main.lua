@@ -3,6 +3,7 @@ local UI = require "UI"
 function love.load()
 
    love.graphics.setBackgroundColor( 1,1,1 )
+   big_font = love.graphics.newFont(24)
 
    -- Set up variables 
    explosives = {15}
@@ -35,12 +36,12 @@ function love.draw()
       UI.label { boom },
       UI.label { "  - Explosives used: "..explosives[1] },
       {
-         UI.label { "Best offer -->" }, 
+         UI.label({ "Best offer -->" }, big_font), 
          { 
             UI.button( "Get now!", function () end ), 
             UI.button( "Remind later!", function () end ) 
          },
-         UI.label { "<-- Best offer" },
+         UI.label({ "<-- Best offer" }, big_font),
       },
       UI.label { "Whatever, " },
       UI.label { "  I am done. " },
