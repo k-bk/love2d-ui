@@ -18,6 +18,7 @@ Type `make` inside cloned repo to test the capabilities of the library.
 ## Usages:
 - [karolBak/love2d-double-pendulum](https://github.com/karolBak/love2d-double-pendulum)
 - [karolBak/love2d-lotka-volterra](https://github.com/karolBak/love2d-lotka-volterra)
+- [karolBak/love2d-lotka-volterra](https://github.com/karolBak/love2d-point-location)
 
 ## Example
 ```lua
