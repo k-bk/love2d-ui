@@ -41,11 +41,11 @@ function round_to_grid(value)
    return math.ceil(value / UI.grid_size) * UI.grid_size
 end
 
-function UI.label(text, font)
+function UI.label(conf)
    return { 
       type = "label", 
-      text = function () return text[1] end,
-      font = font or UI.font
+      text = function () return conf[1] end,
+      font = conf.font or UI.font
    }
 end
 
@@ -57,11 +57,11 @@ function draw_label(e, x, y)
    return width, height
 end
 
-function UI.button(text, fun) 
+function UI.button(conf) 
    return { 
       type = "button",
-      text = function () return text end, 
-      on_click = fun,
+      text = function () return conf[1] end, 
+      on_click = conf.on_click,
       state = "normal",
    }
 end
@@ -77,13 +77,14 @@ function draw_button(e, x, y)
    return width, height
 end
 
-function UI.slider(min, max, value) 
+function UI.slider(conf) 
+   local value = conf[1]
    return { 
       type = "slider",
       value = function () return value[1] end,
       set_value = function (val) value[1] = val end,
-      min = min,
-      max = max,
+      min = conf.range[1],
+      max = conf.range[2],
       width = 200,
       state = "normal",
    }
@@ -146,7 +147,8 @@ function draw_slider(e, x, y)
    return width, height 
 end
 
-function UI.inputbox(value)
+function UI.inputbox(conf)
+   local value = conf[1]
    return {
       type = "inputbox",
       value = function () return value[1] end,

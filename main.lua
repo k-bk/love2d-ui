@@ -26,22 +26,22 @@ end
 function love.draw()
    UI.draw { x = 30, y = 30,
       UI.label { "Cannon simulator" },
-      UI.inputbox( name ),
+      UI.inputbox { name },
       UI.label { "  - Select amount of explosives:" },
-      UI.slider( 0, 100, explosives), -- 'explosives' has to be a table
+      UI.slider { explosives, range = {0, 100} },
       { 
-         UI.button( "Load explosives", loadCannon ),
-         UI.button( "Set fire", setFire ),
+         UI.button { "Load explosives", on_click = loadCannon },
+         UI.button { "Set fire", on_click = setFire },
       },
       UI.label { boom },
       UI.label { "  - Explosives used: "..explosives[1] },
       {
-         UI.label({ "Best offer -->" }, big_font), 
+         UI.label { "Best offer -->", font = big_font }, 
          { 
-            UI.button( "Get now!", function () end ), 
-            UI.button( "Remind later!", function () end ) 
+            UI.button { "Get now!", on_click = function () end }, 
+            UI.button { "Remind later!", on_click = function () end },
          },
-         UI.label({ "<-- Best offer" }, big_font),
+         UI.label { "<-- Best offer", font = big_font },
       },
       UI.label { "Whatever, " },
       UI.label { "  I am done. " },
