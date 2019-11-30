@@ -43,10 +43,10 @@ end
 function love.draw ()
    UI.draw {
       UI.label { "Select amount of explosives" },
-      UI.slider( 0, 100, explosives ),
+      UI.slider { explosives, range = { 0,100 } },
       {  
-         UI.button( "Load explosives", loadCannon ), 
-         UI.button( "Set fire", setFire )
+         UI.button { "Load explosives", on_click = loadCannon }, 
+         UI.button { "Set fire", on_click = setFire },
       },
       UI.label { boom },
    }
