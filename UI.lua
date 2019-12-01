@@ -83,13 +83,13 @@ function UI.button(conf)
 end
 
 function draw_button(e, x, y)
-   local width, height = drawFrame(x, y, UI.margin, e.text(), e.state)
+   local width, height = draw_frame{ e.text(), x = x, y = y, state = e.state }
    e.state = get_state(rectangle(x, y, width, height), point_in_AABB)
    if e.state == "released" then
       UI.released = false
       e.on_click()
    end
-   width, height = drawFrame(x, y, UI.margin, e.text(), e.state)
+   width, height = draw_frame{ e.text(), x = x, y = y, state = e.state }
    return width, height
 end
 
@@ -301,6 +301,29 @@ function clamp ( min, max, value )
    return value
 end
 
+function draw_frame(conf)
+   local x, y = conf.x, conf.y
+   local w, h = conf.width, conf.height
+   local font = conf.font or UI.font
+   local state = conf.state
+   local margin = UI.smargin
+   if not w or w == "auto" then w = font:getWidth(conf[1]) + 2*margin end
+   if not h or h == "auto" then h = font:getHeight(conf[1]) + 2*margin end
+   if align == "right" then
+      x = x - w
+   elseif align == "center" then
+      x = x - w / 2
+   end
+
+   color(c.background[state])
+   love.graphics.rectangle("fill", x, y, w, h, UI.corner, UI.corner)
+   color(c.border)
+   love.graphics.rectangle("line", x, y, w, h, UI.corner, UI.corner)
+   color(c.text[state])
+   love.graphics.print(conf[1], font, x + margin, y + margin)
+
+   return w,h
+end
 
 function drawFrame (x, y, margin, text, state, align)
    local align = align or "left"
