@@ -7,6 +7,7 @@ local UI = {
    position = { x=0, y=0 },
    click = { x=0, y=0 },
    recording = false,
+   colliders = {}
 }
 
 local c = 
@@ -41,6 +42,21 @@ function round_to_grid(value)
    return math.ceil(value / UI.grid_size) * UI.grid_size
 end
 
+function UI.add_collider(uid, shape)
+   colliders[uid] = shape
+end
+
+function UI.AABB_collider(x, y, width, height)
+   return { type = "rectangle", x, y, width, height }
+end
+
+function point_in_AABB(point, box)
+   return point.x >= box.x 
+      and point.x <= box.x + box.width
+      and point.y >= box.y
+      and point.y <= box.y + box.height
+end
+
 function UI.label(conf)
    return { 
       type = "label", 
@@ -68,7 +84,7 @@ end
 
 function draw_button(e, x, y)
    local width, height = drawFrame(x, y, UI.margin, e.text(), e.state)
-   e.state = get_state(rectangle(x, y, width, height), pointInAABB)
+   e.state = get_state(rectangle(x, y, width, height), point_in_AABB)
    if e.state == "released" then
       UI.released = false
       e.on_click()
@@ -102,7 +118,7 @@ function draw_slider(e, x, y)
    local width = e.width + 2 * UI.margin
    local height = 7 * UI.margin
 
-   local state = get_state(rectangle(x, y, width, height), pointInAABB)
+   local state = get_state(rectangle(x, y, width, height), point_in_AABB)
    if state == "pressed" then
       local new_percent = (UI.position.x - x - UI.margin) / e.width
       new_percent = clamp(0, 1, new_percent)
@@ -139,7 +155,7 @@ function draw_slider(e, x, y)
       val = val + spaceval
    end
 
-   color(c.background[get_state(circle, pointInCircle)])
+   color(c.background[get_state(circle, point_in_circle)])
    love.graphics.circle("fill", circle.x, circle.y, UI.radius)
    color(c.border) 
    love.graphics.circle("line", circle.x, circle.y, UI.radius)
@@ -160,7 +176,7 @@ end
 function draw_inputbox(e, x, y)
    local width = 150
    local _, height = drawFrame(x, y, 3, e.value(), e.state)
-   e.state = get_state(rectangle(x, y, width, height), pointInAABB)
+   e.state = get_state(rectangle(x, y, width, height), point_in_AABB)
    if e.state == "released" then
       UI.released = false
       UI.recording = "numbers"
@@ -275,14 +291,7 @@ function get_state(e, in_shape)
    return "normal"
 end
 
-function pointInAABB(point, box)
-   return point.x >= box.x 
-      and point.x <= box.x + box.width
-      and point.y >= box.y
-      and point.y <= box.y + box.height
-end
-
-function pointInCircle(point, circle)
+function point_in_circle(point, circle)
    return (point.x - circle.x)^2 + (point.y - circle.y)^2 <= circle.radius^2
 end
 
@@ -291,6 +300,7 @@ function clamp ( min, max, value )
    elseif value > max then return max end
    return value
 end
+
 
 function drawFrame (x, y, margin, text, state, align)
    local align = align or "left"

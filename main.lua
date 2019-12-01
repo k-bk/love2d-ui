@@ -26,7 +26,7 @@ end
 function love.draw()
    UI.draw { x = 30, y = 30,
       UI.label { "Cannon simulator" },
-      UI.inputbox { name },
+      { UI.label { "Name: " }, UI.inputbox { name }, },
       UI.label { "  - Select amount of explosives:" },
       UI.slider { explosives, range = {0, 100} },
       { 
