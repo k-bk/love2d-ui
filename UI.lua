@@ -91,7 +91,6 @@ function UI.slider(conf)
 end
 
 function draw_slider(e, x, y)
-   local old_y = y
    local percent = (e.value() - e.min) / (e.max - e.min) 
    local circle = { 
       x = x + UI.margin + e.width * percent, 
@@ -127,16 +126,14 @@ function draw_slider(e, x, y)
    love.graphics.rectangle("line", x, y, width,
       UI.margin, UI.corner, UI.corner)
 
-   local space = e.width / 5
-   local spaceval = (e.max - e.min) / 5
-   local val = e.min
    y = y + 2 * UI.margin 
-   for offset = UI.margin, e.width + UI.margin, space do
+   for percent = 0, 1, 0.2 do
+      local offset = UI.margin + e.width * percent
+      local val = e.min * (1 - percent) + e.max * percent
       color(c.border) 
       love.graphics.line(x + offset, y - UI.margin, x + offset, y)
       color(c.text.normal) 
       love.graphics.printf(("%g"):format(val), UI.font, x + offset - 50, y, 100, "center")
-      val = val + spaceval
    end
 
    color(c.background[get_state(circle, pointInCircle)])
