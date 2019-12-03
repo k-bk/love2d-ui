@@ -105,7 +105,7 @@ function draw_slider(e, x, y)
    if state == "pressed" then
       local new_percent = (UI.position.x - x - UI.margin) / e.width
       new_percent = clamp(0, 1, new_percent)
-      e.set_value(new_percent * (e.max - e.min) + e.min)
+      e.set_value(lerp(e.min, e.max, new_percent))
    end
 
    -- draw labels with minimum and maximum
@@ -127,9 +127,9 @@ function draw_slider(e, x, y)
       UI.margin, UI.corner, UI.corner)
 
    y = y + 2 * UI.margin 
-   for percent = 0, 1, 0.2 do
+   for percent = 0, 1, 1/5 do
       local offset = UI.margin + e.width * percent
-      local val = e.min * (1 - percent) + e.max * percent
+      local val = lerp(e.min, e.max, percent)
       color(c.border) 
       love.graphics.line(x + offset, y - UI.margin, x + offset, y)
       color(c.text.normal) 
@@ -287,6 +287,10 @@ function clamp ( min, max, value )
    if value < min then return min
    elseif value > max then return max end
    return value
+end
+
+function lerp ( min, max, percent )
+   return min * (1 - percent) + max * percent
 end
 
 function draw_frame(conf)
