@@ -3,5 +3,6 @@ run: love
 	./love .
 
 love:
-	wget -O love https://bitbucket.org/rude/love/downloads/love-11.3-x86_64.AppImage
+	curl -L -o love https://github.com/love2d/love/releases/download/11.3/love-11.3-x86_64.AppImage
 	chmod +x love
+
